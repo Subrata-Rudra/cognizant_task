@@ -635,6 +635,97 @@ public class Main {
         }
     }
 
+
+    private static void updatePlaylistInformation(Connection connection) {
+        try {
+            System.out.println("--------------Update Playlist Information--------------");
+
+            System.out.println("Enter your email id:");
+            String email = sc.next();
+            System.out.println("Enter your password:");
+            String password = sc.next();
+
+            if (email.isEmpty()) {
+                System.out.println("Please enter the email id");
+                return;
+            }
+            if (password.isEmpty()) {
+                System.out.println("Please enter the password");
+                return;
+            }
+
+            String selectUserQuery = "SELECT * FROM User WHERE email = ?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(selectUserQuery);
+            preparedStatement.setString(1, email);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String hashedPassword = resultSet.getString("password_hash");
+                int uid = resultSet.getInt("user_id");
+
+                if (hashedPassword.equals(password)) {
+                    sc.nextLine(); // Clear the scanner buffer after using `next()`
+                    System.out.println("Enter the playlist name:");
+                    String name = sc.nextLine();
+
+                    if (name.isEmpty()) {
+                        System.out.println("Please enter the playlist name");
+                        return;
+                    }
+
+                    String getPlaylistQuery = "SELECT * FROM Playlist WHERE creator_id = ? AND name = ?;";
+                    preparedStatement = connection.prepareStatement(getPlaylistQuery);
+                    preparedStatement.setInt(1, uid);
+                    preparedStatement.setString(2, name);
+                    resultSet = preparedStatement.executeQuery();
+
+                    if (resultSet.next()) {
+                        // Retrieve playlist details
+                        String playlistName = resultSet.getString("name");
+                        String playlistCreationDate = resultSet.getString("creation_date");
+                        int pid = resultSet.getInt("playlist_id");
+
+                        System.out.println("----------------CURRENT PLAYLIST DETAILS----------------");
+                        System.out.println("Name: " + playlistName);
+                        System.out.println("Creation Date: " + playlistCreationDate);
+                        System.out.println("-------------------------------------------------------");
+
+                        System.out.println("Enter new playlist name:");
+                        String newPlaylistName = sc.nextLine();
+
+                        if (newPlaylistName.isEmpty()) {
+                            System.out.println("Please enter the playlist name");
+                            return;
+                        }
+
+                        String updatePlaylistQuery = "UPDATE Playlist SET name = ? WHERE playlist_id = ?;";
+                        preparedStatement = connection.prepareStatement(updatePlaylistQuery);
+                        preparedStatement.setString(1, newPlaylistName);
+                        preparedStatement.setInt(2, pid);
+                        int rowsUpdated = preparedStatement.executeUpdate();
+
+                        if (rowsUpdated > 0) {
+                            System.out.println("Playlist updated successfully!");
+                        } else {
+                            System.out.println("Failed to update playlist information.");
+                        }
+                    } else {
+                        System.out.println("Playlist not found.");
+                    }
+                } else {
+                    System.out.println("Password is incorrect.");
+                }
+            } else {
+                System.out.println("User not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private static void deletePlaylist(Connection connection) {
         try {
             System.out.println("--------------Delete Playlist--------------");
@@ -729,6 +820,9 @@ public class Main {
                 viewPlaylist(connection);
                 break;
             case 11:
+                updatePlaylistInformation(connection);
+                break;
+            case 12:
                 deletePlaylist(connection);
                 break;
             default:
@@ -737,7 +831,7 @@ public class Main {
     }
 
     private static void printMenu() {
-        System.out.println("---------------MENU---------------\n----------------------------------\n0 --> Exit\n1 --> Register\n2 --> View Account Details\n3 --> Update Account Details\n4 --> Delete Account\n----------------------------------\n5 --> Add New Song\n6 --> View Song Details\n7 --> Update Song Information\n8 --> Delete A Song\n----------------------------------\n9 --> Create A New Playlist\n10 --> View Playlist Details\n11 --> Delete A Playlist\n----------------------------------\nEnter the number according to which service you want:");
+        System.out.println("---------------MENU---------------\n----------------------------------\n0 --> Exit\n1 --> Register\n2 --> View Account Details\n3 --> Update Account Details\n4 --> Delete Account\n----------------------------------\n5 --> Add New Song\n6 --> View Song Details\n7 --> Update Song Information\n8 --> Delete A Song\n----------------------------------\n9 --> Create A New Playlist\n10 --> View Playlist Details\n11 --> Update Playlist Information\n12 --> Delete A Playlist\n----------------------------------\nEnter the number according to which service you want:");
         currentIndex = sc.nextInt();
     }
 
