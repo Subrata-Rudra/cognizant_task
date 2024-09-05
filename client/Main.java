@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import util.DatabaseConnection;
 import custom_exceptions.UserNotFoundException;
+import custom_exceptions.InvalidEmailException;
 
 public class Main {
     private static Scanner sc = new Scanner(System.in);
@@ -36,8 +37,8 @@ public class Main {
                 return;
             }
             if (!email.contains("@")) {
-                System.out.println("Please enter a valid email id");
-                return;
+                // Throwing custom exception
+                throw new InvalidEmailException(email + "is not a valid email ID.");
             }
             if (username.isEmpty()) {
                 System.out.println("Please enter a username");
@@ -65,6 +66,8 @@ public class Main {
             if (rowsInserted > 0) {
                 System.out.println("User registered successfully!");
             }
+        } catch (InvalidEmailException e) { // Catching custom exception
+            System.err.println("ERROR: " + e.getMessage());
         } catch (SQLException e) {
             if (e.getSQLState().equals("23000") || e.getErrorCode() == 1062) {
                 System.out.println("User registration failed: Email already exists.");
