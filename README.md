@@ -61,6 +61,6 @@ d) Delete a playlist
 
 ## Run The Program
 1. Go inside the folder **client**
-2. then run the file named **App.java**
+2. then run the file named **Main.java**
 3. Then it will show many options from 0 to 12
 4. Now enter any number of your choice to use that respective service
